@@ -1,0 +1,19 @@
+#!/bin/sh
+
+################################################################################
+# WARNING: DO NOT EDIT BELOW THIS LINE                                         #
+#                                                                              #
+# THIS FILE IS MOSTLY BOILERPLATE AND EDITING SHOULD NOT BE NEEDED             #
+################################################################################
+
+
+exec 2>&1
+echo "Starting {{pkg_name}} {{pkg_version}}"
+
+export JAVA_HOME=$(hab pkg path core/jdk8)
+export CATALINA_OPTS="{{cfg.server.catalina-opts}}"
+export CATALINA_HOME="$(hab pkg path chetan/tomcat8)/tc"
+export CATALINA_BASE="{{pkg.svc_var_path}}/tc"
+
+echo "Executing Tomcat here: ${CATALINA_HOME}/bin/catalina.sh"
+exec ${CATALINA_HOME}/bin/catalina.sh run

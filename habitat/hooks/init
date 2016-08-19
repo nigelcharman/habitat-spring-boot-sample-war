@@ -1,0 +1,73 @@
+#!/bin/sh
+
+# Name of application WAR
+war_file="spring-boot-sample.war"
+
+do_app_config() {
+  # no-op by default
+  return 0;
+}
+
+################################################################################
+# WARNING: DO NOT EDIT BELOW THIS LINE                                         #
+#                                                                              #
+# SETTING `war_file` ABOVE SHOULD BE ENOUGH. PROCEED WITH CAUTION!             #
+################################################################################
+
+
+################
+# TOMCAT SETUP #
+################
+
+# busybox env doesn't like this???!
+debug() { if [ ! -z "$DEBUG" ]; then echo "$*"; fi }
+
+echo "Preparing CATALINA_BASE..."
+
+debug "sys.ip              = {{sys.ip}}"
+debug "sys.hostname        = {{sys.hostname}}"
+debug "pkg.origin          = {{pkg.origin}}"
+debug "pkg.name            = {{pkg.name}}"
+debug "pkg.version         = {{pkg.version}}"
+debug "pkg.release         = {{pkg.release}}"
+debug "pkg.ident           = {{pkg.ident}}"
+debug "pkg.deps            = {{pkg.deps}}"
+debug "pkg.exposes         = {{pkg.exposes}}"
+debug "pkg.svc_path        = {{pkg.svc_path}}"
+debug "pkg.svc_config_path = {{pkg.svc_config_path}}"
+debug "pkg.svc_data_path   = {{pkg.svc_data_path}}"
+debug "pkg.svc_files_path  = {{pkg.svc_files_path}}"
+debug "pkg.svc_static_path = {{pkg.svc_static_path}}"
+debug "pkg.svc_var_path    = {{pkg.svc_var_path}}"
+
+# Move directories that ship in the package into place
+for d in logs temp webapps work; do
+  mkdir -p {{pkg.svc_var_path}}/tc/$d
+done
+
+# copy some tomcat files over
+cp -R $(hab pkg path chetan/tomcat8)/tc/conf {{pkg.svc_var_path}}/tc/
+
+# Symlink config files into $CATALINA_BASE/conf
+for file in $(cd {{pkg.svc_config_path}}; ls -1)
+do
+  echo "Linking $file"
+  target="${file//_//}"
+  ln -vsf {{pkg.svc_config_path}}/$file {{pkg.svc_var_path}}/tc/$target
+done
+
+chown -R hab:hab {{pkg.svc_path}}/*
+
+echo "Done preparing CATALINA_BASE"
+
+
+
+#############
+# APP SETUP #
+#############
+
+# Copy WAR file into tomcat webapps dir
+webapps_dir="{{pkg.svc_var_path}}/tc/webapps"
+cp {{pkg.path}}/dist/${war_file} ${webapps_dir}/
+
+do_app_config
