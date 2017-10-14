@@ -1,11 +1,11 @@
-pkg_origin=chetan
+pkg_origin=nigelcharman
 pkg_name=spring-boot-sample-war
 pkg_version=1.4.0
 pkg_maintainer="Chetan Sarva <chetan@pixelcop.net>"
 pkg_license=("Apache-2.0")
 pkg_upstream_url=https://github.com/chetan/habitat-spring-boot-sample-war
 pkg_source=localsource.tar.gz
-pkg_deps=(chetan/tomcat8)
+pkg_deps=(core/tomcat8)
 pkg_build_deps=(
   core/jdk8
   core/maven
